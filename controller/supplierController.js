@@ -30,18 +30,22 @@ router.post('/', (req, res) => {
                 err
             })
         })
-
-    router.delete('/:supplierId', (req, res) => {
-        console.log("delte")
-        console.log(req.params.supplierId, "delete request")
-        supplierService.deleteSupplier(req.params.supplierId)
-            .then(data => {
-                res.json({
-                    response: data,
-                    sucess: true
-                })
-            })
-    })
 });
+
+router.delete('/:supplierId', (req, res) => {
+    console.log("delte", req.params.supplierId)
+    console.log(req.params.supplierId, "delete request")
+    supplierService.deleteSupplier(req.params.supplierId)
+        .then(data => {
+            res.json({
+                data: data,
+                sucess: true
+            })
+        })
+})
+
+
+
+
 
 module.exports = router;

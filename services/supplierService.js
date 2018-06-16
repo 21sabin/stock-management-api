@@ -6,9 +6,9 @@ var supplierService=(()=>{
 
     async function addSupplier(supplier){
         return await SupplierModel.create({
-            supplierName:supplier.name,
+            name:supplier.name,
             address:supplier.address,
-            contact_no:supplier.contact
+            contact:supplier.contact
         })
     }
 
@@ -20,10 +20,24 @@ var supplierService=(()=>{
        return await SupplierModel.findByIdAndRemove(supplierId);
     }
 
+    async function updateSupplier(supplier){
+        let options={new :true};
+        return await SupplierModel.findByIdAndUpdate(
+            {_id:supplier._id},
+            { $set: { name:supplier.name,address:supplier.address,contact:supplier.contact}}
+        )
+    }
+
+    async function fetchSupplierById(supplierId){
+        return await SupplierModel.findById({_id:supplierId});
+    }
+
     return {
         addSupplier:addSupplier,
         fetchSupplier:fetchSupplier,
-        deleteSupplier:deleteSupplier
+        deleteSupplier:deleteSupplier,
+        updateSupplier:updateSupplier,
+        fetchSupplierById:fetchSupplierById
     }
 
 })();

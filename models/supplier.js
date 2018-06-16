@@ -2,7 +2,7 @@ const mongoose=require('mongoose');
 let Schema=mongoose.Schema;
 
 const SupplierSchema=new Schema({
-    supplierName:{
+    name:{
         type:String,
         require:true
     },
@@ -10,7 +10,7 @@ const SupplierSchema=new Schema({
         type:String,
         require:true
     },
-    contact_no:{
+    contact:{
         type:String,
         required:true
     },

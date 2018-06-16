@@ -10,7 +10,8 @@ var inventoryService = (() => {
       originalPrice: inventory.originalPrice,
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
-      supplier: inventory.supplier
+      supplier: inventory.supplier,
+      date:inventory.date
     })
   }
 
@@ -18,9 +19,23 @@ var inventoryService = (() => {
     return await InventoryModel.findByIdAndRemove(id);
   }
 
+  async function fetchProduct(){
+    return await InventoryModel.find();
+  }
+
+  async function countProduct(){
+    return await InventoryModel.aggregate([
+      { $group:{_id:"$pname",count:{$sum:1}} }
+    ])
+  }
+
+ 
+
   return {
     createInventory: createInventory,
-    deleteInventory: deleteInventory
+    deleteInventory: deleteInventory,
+    fetchProduct:fetchProduct,
+    countProduct:countProduct
   }
 })();
 

@@ -29,6 +29,10 @@ const InventorySchema = new Schema({
   supplier: {
     type: String,
     required: true
+  },
+  date:{
+    type:String,
+    required:true
   }
 });
 
