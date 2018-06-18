@@ -4,7 +4,7 @@ let router = Router();
 
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const Inventory=require("../models/inventory");
+const Inventory = require("../models/inventory");
 
 const inventoryService = require('../services/inventoryService');
 
@@ -27,28 +27,28 @@ router.post('/create', (req, res) => {
     })
 });
 
-router.get('/',(req,res)=>{
-  inventoryService.fetchProduct().then(response=>res.status(200).json({
-    success:true,
-    message:"Product list",
-    data:response
+router.get('/', (req, res) => {
+  inventoryService.fetchProduct().then(response => res.status(200).json({
+    success: true,
+    message: "Product list",
+    data: response
   }))
-  .catch(err=>{
-    res.status(500).json({
-      success:false,
-      err:err
+    .catch(err => {
+      res.status(500).json({
+        success: false,
+        err: err
+      })
     })
-  })
 });
 
 router.delete('/:inventoryID', (req, res) => {
-  console.log('inside delete inventory',req.params.inventoryID);
+  console.log('inside delete inventory', req.params.inventoryID);
   inventoryService.deleteInventory(req.params.inventoryID)
     .then(data => {
       res.json({
         message: "Inventory deleted successfully",
         success: true,
-        data:data
+        data: data
       })
     })
     .catch(err => {
@@ -59,64 +59,72 @@ router.delete('/:inventoryID', (req, res) => {
     })
 });
 
-router.get('/totalNoProduct',(req,res)=>{
-  let total=0;
+router.get('/totalNoProduct', (req, res) => {
+  let total = 0;
   console.log("inventory track");
+  Inventory.aggregate([
+    { $match: {} },
+    { $group: { _id: "$productName", count: { $sum: 1 } } }
+  ]).then((result) => {
+    console.log(result, "inventory track")
+    result.map(data => {
+      total = total + data.count;
+    })
+    res.json({
+      count: total
+    })
+  })
+
+  router.get('/totalInventoryValue', (req, res) => {
+    let totalValue=0;
     Inventory.aggregate([
-    { $match:{} },
-    { $group:{ _id:"$productName",count:{$sum:1}}}
-    
-    ]).then((result)=>{
-      console.log(result,"inventory track")
-      result.map(data=>{
-       
-        total=total+data.count;
-
+      { $match: {} },
+      { $group: { _id: "$productName", quantity: { $sum: "$quantity" }, cost: { $sum: "$originalPrice" } } }
+    ]).then((result) => {
+      result.map(product => {
+        let value=0;
+        console.log(product)
+        let quantity = parseInt(product.quantity);
+        let cost = parseInt(product.cost);
+        console.log(quantity * cost)
+        value = quantity * cost + value;
+        console.log(totalValue, "total");
+       this.totalValue=value;
       })
-      res.json({
-        count:total
-      })
+    }).catch(err=>{
+      console.log(err)
+    });
+    res.json({
+      value:totalValue
     })
+  })
 
-    router.get('/totalInventoryValue',(req,res)=>{
-      console.log("inventory value")
-      let totalValue=0;
-      Inventory.aggregate([
-        { $match:{}},
-        { $group:{_id:"$productName",quantity:{ $sum:"$quantity"},cost:{$sum:"$originalPrice"}}}
-      ]).then((result)=>{
-          result.map(product=>{
-            console.log(product)
-            let quantity=parseInt(product.quantity);
-            let cost=parseInt(product.cost);
-            console.log(quantity*cost)
-              totalValue=quantity*cost+totalValue;
-              res.status(200).json({
-                message:"Total Inventory value",
-                value:totalValue
-              })
-              
-          })
-      });
-      console.log(totalValue,"totalvalue")
-      
-    })
-  
-    // inventoryService.countProduct().then((err,count)=>{
-    //   console.log(count,"count")
-    //   res.json({
-    //     message: "Total inventory product",
-    //     success: true,
-    //     data:count
-    //   })
-    // })
-    // .catch(err => {
-    //   res.json({
-    //     message: "Couldn't count inventroy.",
-    //     success: false
-    //   })
-    // })
-    
+  router.put("/update", (req, res) => {
+    console.log(req.body, "update product");
+    inventoryService.updateProduct(req.body)
+      .then(result => {
+        console.log(result, "updated sucessfully")
+      })
+      .catch(err => {
+        console.log(err, "error occured")
+      })
+  })
+
+  // inventoryService.countProduct().then((err,count)=>{
+  //   console.log(count,"count")
+  //   res.json({
+  //     message: "Total inventory product",
+  //     success: true,
+  //     data:count
+  //   })
+  // })
+  // .catch(err => {
+  //   res.json({
+  //     message: "Couldn't count inventroy.",
+  //     success: false
+  //   })
+  // })
+
 });
 
 module.exports = router;

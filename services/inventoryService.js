@@ -29,13 +29,36 @@ var inventoryService = (() => {
     ])
   }
 
+  async function updateProduct(product){
+    console.log(product,"product inside update porudiuct")
+    return await InventoryModel.updateOne(
+      {_id:product._id},
+      {$set:{
+      productName:product.productName,
+      quantity:product.quantity,
+      measurement:product.measurement,
+      originalPrice:product.originalPrice,
+      sellingPrice:product.sellingPrice,
+      supplier:product.supplier,
+      date:product.date
+      }
+    },
+    
+  )
+  // return await InventoryModel.findByIdAndUpdate(
+  //   {_id:product._id},
+  //   { $set:{}}
+  // )
+  }
+
  
 
   return {
     createInventory: createInventory,
     deleteInventory: deleteInventory,
     fetchProduct:fetchProduct,
-    countProduct:countProduct
+    countProduct:countProduct,
+    updateProduct:updateProduct
   }
 })();
 
