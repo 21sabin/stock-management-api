@@ -4,6 +4,7 @@ let User = require('../models/user');
 
 module.exports = async function authenticate(req, res, next) {
     let token = req.body.token || req.query.token || req.headers['x-access-token'];
+    console.log(token,"middleware")
     if (token) {
         jwt.verify(token, config.signature, (err, decoded) => {
             if (err) {

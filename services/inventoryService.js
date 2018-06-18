@@ -10,7 +10,8 @@ var inventoryService = (() => {
       originalPrice: inventory.originalPrice,
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
-      supplier: inventory.supplier
+      supplier: inventory.supplier,
+      date:inventory.date
     })
   }
 
@@ -40,12 +41,46 @@ var inventoryService = (() => {
     return await InventoryModel.findByIdAndRemove(id);
   }
 
+  async function fetchProduct(){
+    return await InventoryModel.find();
+  }
+
+  async function countProduct(){
+    return await InventoryModel.aggregate([
+      { $group:{_id:"$pname",count:{$sum:1}} }
+    ])
+  }
+
+  async function updateProduct(product){
+    console.log(product,"product inside update porudiuct")
+    return await InventoryModel.updateOne(
+      {_id:product._id},
+      {$set:{
+      productName:product.productName,
+      quantity:product.quantity,
+      measurement:product.measurement,
+      originalPrice:product.originalPrice,
+      sellingPrice:product.sellingPrice,
+      supplier:product.supplier,
+      date:product.date
+      }
+    },
+    
+  )
+  // return await InventoryModel.findByIdAndUpdate(
+  //   {_id:product._id},
+  //   { $set:{}}
+  // )
+  }
+
+ 
+
   return {
     createInventory: createInventory,
-    fetchAllInventory: fetchAllInventory,
-    fetchInventoryById: fetchInventoryById,
     deleteInventory: deleteInventory,
-    // editInventory: editInventory
+    fetchProduct:fetchProduct,
+    countProduct:countProduct,
+    updateProduct:updateProduct
   }
 })();
 
