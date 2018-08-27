@@ -10,7 +10,7 @@ const CreateUser = require('../models/user');
 
 
 router.post('/login', (req, res) => {
-    console.log(req.body)
+    console.log(req.body,"login route")
     let email=req.body.email;
     let password=req.body.password;
     console.log(email, password, 'asdasdas');

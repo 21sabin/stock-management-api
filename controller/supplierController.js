@@ -42,6 +42,16 @@ router.delete('/:supplierId', (req, res) => {
                 sucess: true
             })
         })
+});
+
+router.put('/',(req,res)=>{
+    supplierService.updateSupplier(req.body)
+    .then((response)=>{
+        res.json({
+            success:true,
+            data:response
+        })
+    })
 })
 
 

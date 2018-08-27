@@ -30,6 +30,7 @@ let userService=(()=>{
         return await Users.find();
     }
 
+  
     return {
         fetchByEmail:fetchByEmail,
         checkPassword:checkPassword,
