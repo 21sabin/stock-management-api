@@ -5,6 +5,7 @@ let router = Router();
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const Inventory = require("../models/inventory");
+const Category=require('../models/category');
 
 const inventoryService = require('../services/inventoryService');
 
@@ -27,6 +28,18 @@ router.post('/create', (req, res) => {
     })
 });
 
+
+router.post("/category",(req,res)=>{
+  console.log(req.body,"categories");
+  Category.create(req.body)
+  .then(result=>{
+    res.json({
+      message:"Category created successfully",
+      data:result
+    })
+  })
+});
+
 router.get('/', (req, res) => {
   inventoryService.fetchProduct().then(response => res.status(200).json({
     success: true,
@@ -41,11 +54,19 @@ router.get('/', (req, res) => {
     })
 });
 
+router.get('/category',(req,res)=>{
+  Category.find().then(result=>{
+    res.json({
+      data:result?result:[]
+    })
+  });
+})
+
 router.delete('/:inventoryID', (req, res) => {
   console.log('inside delete inventory', req.params.inventoryID);
   inventoryService.deleteInventory(req.params.inventoryID)
     .then(data => {
-      res.status(200).json({
+      res.json({
         message: "Inventory deleted successfully",
         success: true,
         data: data
@@ -54,8 +75,7 @@ router.delete('/:inventoryID', (req, res) => {
     .catch(err => {
       res.json({
         message: "Couldn't delete inventroy with the specified ID",
-        success: false,
-        error: err
+        success: false
       })
     })
 });
@@ -83,21 +103,19 @@ router.get('/totalNoProduct', (req, res) => {
       { $group: { _id: "$productName", quantity: { $sum: "$quantity" }, cost: { $sum: "$originalPrice" } } }
     ]).then((result) => {
       result.map(product => {
-        let value=0;
-        console.log(product)
         let quantity = parseInt(product.quantity);
         let cost = parseInt(product.cost);
         console.log(quantity * cost)
-        value = quantity * cost + value;
+        totalValue = quantity * cost + totalValue;
         console.log(totalValue, "total");
-       this.totalValue=value;
+        res.json({
+          message:"Total inventory value",
+          value:totalValue
+        })
       })
     }).catch(err=>{
       console.log(err)
     });
-    res.json({
-      value:totalValue
-    })
   })
 
   router.put("/update", (req, res) => {
@@ -109,7 +127,8 @@ router.get('/totalNoProduct', (req, res) => {
       .catch(err => {
         console.log(err, "error occured")
       })
-  })
+  });
+
 
   // inventoryService.countProduct().then((err,count)=>{
   //   console.log(count,"count")
