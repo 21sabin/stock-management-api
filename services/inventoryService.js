@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
@@ -12,72 +11,7 @@ var inventoryService = (() => {
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
       supplier: inventory.supplier,
-      date:inventory.date
-    })
-  }
-
-  async function deleteInventory(id) {
-    return await InventoryModel.findByIdAndRemove(id);
-  }
-
-  async function fetchProduct(){
-    return await InventoryModel.find();
-  }
-
-  async function countProduct(){
-    return await InventoryModel.aggregate([
-      { $group:{_id:"$pname",count:{$sum:1}} }
-    ])
-  }
-
-  async function updateProduct(product){
-    console.log(product,"product inside update porudiuct")
-    return await InventoryModel.updateOne(
-      {_id:product._id},
-      {$set:{
-      productName:product.productName,
-      quantity:product.quantity,
-      measurement:product.measurement,
-      originalPrice:product.originalPrice,
-      sellingPrice:product.sellingPrice,
-      supplier:product.supplier,
-      date:product.date
-      }
-    },
-    
-  )
-  // return await InventoryModel.findByIdAndUpdate(
-  //   {_id:product._id},
-  //   { $set:{}}
-  // )
-  }
-
- 
-
-  return {
-    createInventory: createInventory,
-    deleteInventory: deleteInventory,
-    fetchProduct:fetchProduct,
-    countProduct:countProduct,
-    updateProduct:updateProduct
-  }
-})();
-
-=======
-var inventoryService = (() => {
-
-  const InventoryModel = require('../models/inventory');
-
-  async function createInventory(inventory) {
-    return await InventoryModel.create({
-      productName: inventory.productName,
-      quantity: inventory.quantity,
-      measurement: inventory.measurement,
-      originalPrice: inventory.originalPrice,
-      sellingPrice: inventory.sellingPrice,
-      profit: inventory.profit,
-      supplier: inventory.supplier,
-      date:inventory.date
+      date: inventory.date
     })
   }
 
@@ -107,48 +41,41 @@ var inventoryService = (() => {
     return await InventoryModel.findByIdAndRemove(id);
   }
 
-  async function fetchProduct(){
+  async function fetchProduct() {
     return await InventoryModel.find();
   }
 
-  async function countProduct(){
+  async function countProduct() {
     return await InventoryModel.aggregate([
-      { $group:{_id:"$pname",count:{$sum:1}} }
+      { $group: { _id: "$pname", count: { $sum: 1 } } }
     ])
   }
 
-  async function updateProduct(product){
-    console.log(product,"product inside update porudiuct")
+  async function updateProduct(product) {
+    console.log(product, "product inside update porudiuct")
     return await InventoryModel.updateOne(
-      {_id:product._id},
-      {$set:{
-      productName:product.productName,
-      quantity:product.quantity,
-      measurement:product.measurement,
-      originalPrice:product.originalPrice,
-      sellingPrice:product.sellingPrice,
-      supplier:product.supplier,
-      date:product.date
+      { _id: product._id },
+      {
+        $set: {
+          productName: product.productName,
+          quantity: product.quantity,
+          measurement: product.measurement,
+          originalPrice: product.originalPrice,
+          sellingPrice: product.sellingPrice,
+          supplier: product.supplier,
+          date: product.date
+        }
       }
-    },
-    
-  )
-  // return await InventoryModel.findByIdAndUpdate(
-  //   {_id:product._id},
-  //   { $set:{}}
-  // )
+    )
   }
-
- 
 
   return {
     createInventory: createInventory,
     deleteInventory: deleteInventory,
-    fetchProduct:fetchProduct,
-    countProduct:countProduct,
-    updateProduct:updateProduct
+    fetchProduct: fetchProduct,
+    countProduct: countProduct,
+    updateProduct: updateProduct
   }
 })();
 
->>>>>>> 1888b25a86157732d250364213af4b6ba3054688
 module.exports = inventoryService;
