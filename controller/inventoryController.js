@@ -55,9 +55,12 @@ router.get('/', (req, res) => {
 });
 
 router.get('/category',(req,res)=>{
+  console.log("category")
   Category.find().then(result=>{
+    console.log(result,"result")
     res.json({
-      data:result?result:[]
+      // data:result?result:[]
+      data:result
     })
   });
 })

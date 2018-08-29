@@ -18,28 +18,6 @@ var inventoryService = (() => {
     // return await InventoryModel.create(inventory)
   }
 
-  async function fetchAllInventory() {
-    return await InventoryModel.find();
-  }
-
-  async function fetchInventoryById(inventoryId) {
-    return await InventoryModel.findById(inventoryId);
-  }
-
-  // async function editInventory(body, inventoryId) {
-  //   return await InventoryModel.findByIdAndUpdate(inventoryId, {
-  //     $set: {
-  //       productName: body.productName,
-  //       quantity: body.quantity,
-  //       measurement: body.measurement,
-  //       originalPrice: body.originalPrice,
-  //       sellingPrice: body.sellingPrice,
-  //       profit: body.profit,
-  //       supplier: body.supplier
-  //     }
-  //   });
-  // }
-
   async function deleteInventory(id) {
     return await InventoryModel.findByIdAndRemove(id);
   }
@@ -69,8 +47,14 @@ var inventoryService = (() => {
           date: product.date
         }
       }
+<<<<<<< Updated upstream
     )
   }
+=======
+    },
+    
+  )}
+>>>>>>> Stashed changes
 
   return {
     createInventory: createInventory,
