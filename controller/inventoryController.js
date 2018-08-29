@@ -28,6 +28,25 @@ router.post('/create', (req, res) => {
     })
 });
 
+router.post('/addSales', (req, res) => {
+  console.log('inside inventory sales');
+  inventoryService.addSales(req.body)
+    .then(data => {
+      res.status(201).json({
+        message: 'Sales added successfully!',
+        success: true,
+        data
+      })
+    })
+    .catch(err => {
+      res.json({
+        message: 'Can\'t add sales',
+        err
+      })
+    })
+});
+
+
 
 router.post("/category",(req,res)=>{
   console.log(req.body,"categories");
