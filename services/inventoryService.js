@@ -1,6 +1,7 @@
 var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
+  const SalesModel = require('../models/sales')
 
   async function createInventory(inventory) {
     console.log(inventory, 'casdasd');
@@ -17,6 +18,41 @@ var inventoryService = (() => {
     })
     // return await InventoryModel.create(inventory)
   }
+
+  // for sales
+  async function addSales(sales) {
+    console.log('inside add sales controller');
+    return await SalesModel.create({
+      productName: sales.productName,
+      category: sales.category,
+      date: sales.date,
+      rate: sales.rate,
+      quantity: sales.quantity,
+      total: sales.total
+    })
+  }
+
+  async function fetchAllInventory() {
+    return await InventoryModel.find();
+  }
+
+  async function fetchInventoryById(inventoryId) {
+    return await InventoryModel.findById(inventoryId);
+  }
+
+  // async function editInventory(body, inventoryId) {
+  //   return await InventoryModel.findByIdAndUpdate(inventoryId, {
+  //     $set: {
+  //       productName: body.productName,
+  //       quantity: body.quantity,
+  //       measurement: body.measurement,
+  //       originalPrice: body.originalPrice,
+  //       sellingPrice: body.sellingPrice,
+  //       profit: body.profit,
+  //       supplier: body.supplier
+  //     }
+  //   });
+  // }
 
   async function deleteInventory(id) {
     return await InventoryModel.findByIdAndRemove(id);
@@ -61,7 +97,8 @@ var inventoryService = (() => {
     deleteInventory: deleteInventory,
     fetchProduct: fetchProduct,
     countProduct: countProduct,
-    updateProduct: updateProduct
+    updateProduct: updateProduct,
+    addSales: addSales
   }
 })();
 
