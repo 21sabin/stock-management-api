@@ -33,6 +33,10 @@ const InventorySchema = new Schema({
   date:{
     type:String,
     required:true
+  },
+  cid:{
+    type:String,
+    required:true
   }
 });
 

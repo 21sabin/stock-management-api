@@ -3,6 +3,7 @@ var inventoryService = (() => {
   const InventoryModel = require('../models/inventory');
 
   async function createInventory(inventory) {
+    console.log(inventory, 'casdasd');
     return await InventoryModel.create({
       productName: inventory.productName,
       quantity: inventory.quantity,
@@ -11,8 +12,10 @@ var inventoryService = (() => {
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
       supplier: inventory.supplier,
-      date: inventory.date
+      date: inventory.date,
+      cid: inventory.productCategory
     })
+    // return await InventoryModel.create(inventory)
   }
 
   async function fetchAllInventory() {
