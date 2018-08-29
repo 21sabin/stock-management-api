@@ -1,6 +1,7 @@
 var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
+  const SalesModel = require('../models/sales')
 
   async function createInventory(inventory) {
     console.log(inventory, 'casdasd');
@@ -16,6 +17,19 @@ var inventoryService = (() => {
       cid: inventory.productCategory
     })
     // return await InventoryModel.create(inventory)
+  }
+
+  // for sales
+  async function addSales(sales) {
+    console.log('inside add sales controller');
+    return await SalesModel.create({
+      productName: sales.productName,
+      category: sales.category,
+      date: sales.date,
+      rate: sales.rate,
+      quantity: sales.quantity,
+      total: sales.total
+    })
   }
 
   async function fetchAllInventory() {
@@ -77,7 +91,8 @@ var inventoryService = (() => {
     deleteInventory: deleteInventory,
     fetchProduct: fetchProduct,
     countProduct: countProduct,
-    updateProduct: updateProduct
+    updateProduct: updateProduct,
+    addSales: addSales
   }
 })();
 
