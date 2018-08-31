@@ -99,8 +99,14 @@ var inventoryService = (() => {
           date: product.date
         }
       }
+<<<<<<< Updated upstream
     )
   }
+=======
+    },
+    
+  )}
+>>>>>>> Stashed changes
 
   return {
     createInventory: createInventory,
