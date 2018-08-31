@@ -32,6 +32,7 @@ router.post('/addSales', (req, res) => {
   console.log('inside inventory sales');
   inventoryService.addSales(req.body)
     .then(data => {
+      console.log(req.body, 'req.body')
       res.status(201).json({
         message: 'Sales added successfully!',
         success: true,
@@ -46,8 +47,6 @@ router.post('/addSales', (req, res) => {
     })
 });
 
-
-
 router.post("/category",(req,res)=>{
   console.log(req.body,"categories");
   Category.create(req.body)
@@ -58,6 +57,33 @@ router.post("/category",(req,res)=>{
     })
   })
 });
+
+router.delete('/category/:categoryId', (req, res) => {
+  inventoryService.deleteCategory(req.params.categoryId)
+    .then(data => {
+      res.json({
+        message: 'Category deleted successfully',
+        success: true,
+        data
+      })
+    })
+    .catch(err => {
+      res.json({
+        message: 'Category delete failed!',
+        err
+      })
+    })
+});
+
+router.put('/category', (req, res) => {
+  inventoryService.updateCategory(req.body)
+    .then(data => {
+      Category.findById(req.body._id)
+        .then(result => {
+          data: result
+        })
+  })
+})
 
 router.get('/', (req, res) => {
   inventoryService.fetchProduct().then(response => res.status(200).json({

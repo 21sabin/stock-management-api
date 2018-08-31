@@ -2,6 +2,7 @@ var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
   const SalesModel = require('../models/sales')
+  const CategoryModel = require('../models/category');
 
   async function createInventory(inventory) {
     console.log(inventory, 'casdasd');
@@ -54,6 +55,21 @@ var inventoryService = (() => {
   //   });
   // }
 
+  async function deleteCategory(categoryId) {
+    return await CategoryModel.findByIdAndRemove(categoryId);
+  }
+
+  async function updateCategory(category) {
+    return await CategoryModel.update(
+      { _id: category._id },
+      {
+        $set: {
+          category: category.category
+        }
+      }
+    )
+  }
+
   async function deleteInventory(id) {
     return await InventoryModel.findByIdAndRemove(id);
   }
@@ -92,7 +108,9 @@ var inventoryService = (() => {
     fetchProduct: fetchProduct,
     countProduct: countProduct,
     updateProduct: updateProduct,
-    addSales: addSales
+    addSales: addSales,
+    deleteCategory: deleteCategory,
+    updateCategory: updateCategory
   }
 })();
 
