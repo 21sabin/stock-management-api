@@ -84,17 +84,22 @@ var inventoryService = (() => {
   }
 
   async function deductProductFromInventory(sales) {
-    console.log(sales,"update salaes")
-      return InventoryModel.updateOne(
-        {
-          _id:sales.productName
-        },
-        {
-          $set:{
-            quantity:sales.quantity
+    console.log(sales,"update salaes");
+    let quantity;
+    InventoryModel.findById(sales.productName).then(product=>{
+        quantity=product.quantity;
+        return InventoryModel.updateOne(
+          {
+            _id:sales.productName
+          },
+          {
+            $set:{
+              quantity:quantity-sales.quantity
+            }
           }
-        }
-      )
+        )
+    })
+     
   }
 
   return {

@@ -8,7 +8,7 @@ const Inventory = require("../models/inventory");
 const Category = require('../models/category');
 let ObjectId = require('mongodb').ObjectID;
 const SalesModel = require('./../models/sales');
-const moment=require('moment');
+const moment = require('moment');
 
 const inventoryService = require('../services/inventoryService');
 
@@ -121,78 +121,125 @@ router.get('/report', (req, res) => {
   });
 })
 
-router.get("/summary",(req,res)=>{
+router.get("/summary", (req, res) => {
   console.log("inventory summary");
-  Inventory.aggregate([
-    {
-      $group:{
-        _id:{ day: { $dayOfYear:"$date"},month:{$month:"$date"},
-        totalAmount:{ $sum: { $multiply:["$quantity","$sellingPrice"]}}},
-       
-      }
+  Inventory.aggregate([{
+    $group: {
+      _id: {
+        day: {
+          $dayOfYear: "$date"
+        },
+        month: {
+          $month: "$date"
+        },
+        totalAmount: {
+          $sum: {
+            $multiply: ["$quantity", "$sellingPrice"]
+          }
+        }
+      },
+
     }
-  ]).then(result=>{
+  }]).then(result => {
     res.json({
-      data:result
+      data: result
     })
-  }).catch(err=>{
+  }).catch(err => {
     res.status(404).json({
       err
     })
   })
-  
+
 })
 
-router.get("/summary/day",(req,res)=>{
-  Inventory.aggregate([
-      {
-        $group:{ _id:"$productName",
-        totalAmount:{$sum:{$multiply:["$quantity","$sellingPrice"]}}},
-      
+router.get("/summary/day", (req, res) => {
+  Inventory.aggregate([{
+    $group: {
+      _id: "$productName",
+      totalAmount: {
+        $sum: {
+          $multiply: ["$quantity", "$sellingPrice"]
+        }
       }
-  ]).then(result=>{
+    },
+
+  }]).then(result => {
     res.json({
-      data:result
+      data: result
     })
-  }).catch(err=>{
+  }).catch(err => {
     res.status(404).json({
       err
     })
   })
 })
 
-router.get("/outOfStock",(req,res)=>{
-    Inventory.find({ quantity:{ $lte:20}}).then(result=>{
-      console.log(result,"result");
-      res.json({
-        data:result
-      })
-    }).catch(err=>{
-      console.log(err,"erro")
+router.get("/outOfStock", (req, res) => {
+  Inventory.find({
+    quantity: {
+      $lte: 20
+    }
+  }).then(result => {
+    console.log(result, "result");
+    res.json({
+      data: result
     })
+  }).catch(err => {
+    console.log(err, "erro")
+  })
 })
 
-router.get("/winterProducts",(req,res)=>{
-  let startMonth=12;let endMonth=3
-   SalesModel.find().populate("pid").then(result=>{
+router.get("/winterProducts", (req, res) => {
+  let startMonth = 12;
+  let endMonth = 3
+  SalesModel.find().populate("pid").then(result => {
     //  console.log(moment(result[0].date).format("MM"),"lt dateresu");
-     let winterProdudcts=result.filter(sales=>{
-       let month=moment(sales.date).format("MM");
-       if(month==12 || month>=1 && month<=endMonth ){
-          return true;
-       }
-     })
-     console.log(winterProdudcts,"winterproductes")
-     res.json({
-       data:winterProdudcts
-     })
-   })
+    let winterProdudcts = result.filter(sales => {
+      let month = moment(sales.date).format("MM");
+      if (month == 12 || month >= 1 && month <= endMonth) {
+        return true;
+      }
+    })
+    console.log(winterProdudcts, "winterproductes")
+    res.json({
+      data: winterProdudcts
+    })
+  })
 })
 
 // {
 //   _ouotalAmount: { $sum: { $multiply: [ "$price", "$quantity" ] } },
 //   count: { $sum: 1 }
 // }
+router.get('/totalInventoryValue', (req, res) => {
+  console.log("fjd");
+  let totalValue = 0;
+  let newResult;
+  Inventory.aggregate([{
+    $group: {
+      _id: "$_id",
+      totalSum: {
+        $sum: {
+          $multiply: ["$quantity", "$originalPrice"]
+        }
+      }
+    }
+  }]).then(result => {
+    result.map(value => {
+      console.log(value, "value")
+      totalValue = value.totalSum + totalValue;
+    });
+    Inventory.count().then(counts=>{
+      res.json({
+        inventoryValue:totalValue,
+        counts
+      })
+    })
+   
+
+  });
+  
+})
 
 router.get('/totalNoProduct', (req, res) => {
   let total = 0;
@@ -218,38 +265,7 @@ router.get('/totalNoProduct', (req, res) => {
     })
   })
 
-  router.get('/totalInventoryValue', (req, res) => {
-    let totalValue = 0;
-    Inventory.aggregate([{
-        $match: {}
-      },
-      {
-        $group: {
-          _id: "$productName",
-          quantity: {
-            $sum: "$quantity"
-          },
-          cost: {
-            $sum: "$originalPrice"
-          }
-        }
-      }
-    ]).then((result) => {
-      result.map(product => {
-        let quantity = parseInt(product.quantity);
-        let cost = parseInt(product.cost);
-        console.log(quantity * cost)
-        totalValue = quantity * cost + totalValue;
-        console.log(totalValue, "total");
-        res.json({
-          message: "Total inventory value",
-          value: totalValue
-        })
-      })
-    }).catch(err => {
-      console.log(err)
-    });
-  })
+
 
   router.get('/report', (req, res) => {
     console.log("report")
