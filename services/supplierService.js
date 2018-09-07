@@ -31,13 +31,17 @@ var supplierService=(()=>{
     async function fetchSupplierById(supplierId){
         return await SupplierModel.findById({_id:supplierId});
     }
+    async function checkDuplicateSupplier(contact){
+        return await SupplierModel.find({contact:contact});
+    }
 
     return {
         addSupplier:addSupplier,
         fetchSupplier:fetchSupplier,
         deleteSupplier:deleteSupplier,
         updateSupplier:updateSupplier,
-        fetchSupplierById:fetchSupplierById
+        fetchSupplierById:fetchSupplierById,
+        checkDuplicateSupplier:checkDuplicateSupplier
     }
 
 })();
