@@ -23,12 +23,12 @@ var inventoryService = (() => {
 
   // for sales
   async function addSales(sales) {
-    console.log(sales.date,'inside add sales controller');
+    console.log(sales.date, 'inside add sales controller');
     return await SalesModel.create({
       pid: sales.pid,
       // category: sales.category,
       cid: sales.cid,
-      date:sales.date,
+      date: sales.date,
       rate: sales.rate,
       quantity: sales.quantity,
       total: sales.total
@@ -69,16 +69,16 @@ var inventoryService = (() => {
     return await InventoryModel.updateOne({
       _id: product._id
     }, {
-      $set: {
-        productName: product.productName,
-        quantity: product.quantity,
-        measurement: product.measurement,
-        originalPrice: product.originalPrice,
-        sellingPrice: product.sellingPrice,
-        supplier: product.supplier,
-        date: product.date
-      }
-    })
+        $set: {
+          productName: product.productName,
+          quantity: product.quantity,
+          measurement: product.measurement,
+          originalPrice: product.originalPrice,
+          sellingPrice: product.sellingPrice,
+          supplier: product.supplier,
+          date: product.date
+        }
+      })
   }
 
   async function getCategoryById(cid) {
@@ -86,20 +86,20 @@ var inventoryService = (() => {
   }
 
   async function deductProductFromInventory(sales) {
-    console.log(sales,"update salaes")
-      return await InventoryModel.updateOne(
-        {
-          _id:sales.pid
-        },
-        {
-          $set:{
-            quantity:sales.quantity
-          }
+    console.log(sales, "update salaes")
+    return await InventoryModel.updateOne(
+      {
+        _id: sales.pid
+      },
+      {
+        $set: {
+          quantity: quantity - sales.quantity
         }
-      )
+      })
+
   }
 
-  async function deleteCategory(id) { 
+  async function deleteCategory(id) {
     return await Category.findByIdAndRemove(id);
   }
 

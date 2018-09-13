@@ -27,20 +27,42 @@ router.get('/:inventoryId', (req, res) => {
 })
 
 router.post('/create', (req, res) => {
-  inventoryService.createInventory(req.body)
-    .then(data => {
-      res.status(201).json({
-        message: "Inventory created successfully",
-        success: true,
-        data
+  console.log(req.body, "product")
+  Inventory.findOne({ productName: req.body.productName }).then(duplicateProduct => {
+    if (duplicateProduct) {
+      console.log("update stock")
+      let newStock = parseInt(req.body.quantity) + parseInt(duplicateProduct.quantity);
+      Inventory.updateOne({ productName: req.body.productName }, {
+        $set: {
+          productName: duplicateProduct.productName,
+          quantity: newStock,
+          measurement: duplicateProduct.measurement,
+          originalPrice: duplicateProduct.originalPrice,
+          sellingPrice: duplicateProduct.sellingPrice,
+          supplier: duplicateProduct.supplier,
+          date: duplicateProduct.date
+        }
+      }).then(result => {
+        console.log(result,"update sucessfully")
+        res.status(201).json({
+          message: "Inventory stock update successfully",
+          updateStock: true,
+          data: result
+        })
       })
-    })
-    .catch(err => {
-      res.json({
-        message: "Can't create Inventory",
-        success: false
-      })
-    })
+    } else {
+      console.log("new proudct")
+      inventoryService.createInventory(req.body)
+        .then(result => {
+          res.status(201).json({
+            message: "Inventory update successfully",
+            updateStock: false,
+            data: result
+          })
+
+        })
+    }
+  })
 });
 
 router.post('/addSales', (req, res) => {
@@ -181,17 +203,24 @@ router.get('/report', (req, res) => {
 
 router.get("/summary", (req, res) => {
   console.log("inventory summary");
-  Inventory.aggregate([
-    {
-      $group: {
-        _id: {
-          day: { $dayOfYear: "$date" }, month: { $month: "$date" },
-          totalAmount: { $sum: { $multiply: ["$quantity", "$sellingPrice"] } }
+  Inventory.aggregate([{
+    $group: {
+      _id: {
+        day: {
+          $dayOfYear: "$date"
         },
+        month: {
+          $month: "$date"
+        },
+        totalAmount: {
+          $sum: {
+            $multiply: ["$quantity", "$sellingPrice"]
+          }
+        }
+      },
 
-      }
     }
-  ]).then(result => {
+  }]).then(result => {
     res.json({
       data: result
     })
@@ -204,15 +233,17 @@ router.get("/summary", (req, res) => {
 })
 
 router.get("/summary/day", (req, res) => {
-  Inventory.aggregate([
-    {
-      $group: {
-        _id: "$productName",
-        totalAmount: { $sum: { $multiply: ["$quantity", "$sellingPrice"] } }
-      },
+  Inventory.aggregate([{
+    $group: {
+      _id: "$productName",
+      totalAmount: {
+        $sum: {
+          $multiply: ["$quantity", "$sellingPrice"]
+        }
+      }
+    },
 
-    }
-  ]).then(result => {
+  }]).then(result => {
     res.json({
       data: result
     })
@@ -224,7 +255,11 @@ router.get("/summary/day", (req, res) => {
 })
 
 router.get("/outOfStock", (req, res) => {
-  Inventory.find({ quantity: { $lte: 20 } }).then(result => {
+  Inventory.find({
+    quantity: {
+      $lte: 20
+    }
+  }).then(result => {
     console.log(result, "result");
     res.json({
       data: result
@@ -235,7 +270,8 @@ router.get("/outOfStock", (req, res) => {
 })
 
 router.get("/winterProducts", (req, res) => {
-  let startMonth = 12; let endMonth = 3
+  let startMonth = 12;
+  let endMonth = 3
   SalesModel.find().populate("pid").then(result => {
     //  console.log(moment(result[0].date).format("MM"),"lt dateresu");
     let winterProdudcts = result.filter(sales => {
@@ -255,6 +291,35 @@ router.get("/winterProducts", (req, res) => {
 //   _ouotalAmount: { $sum: { $multiply: [ "$price", "$quantity" ] } },
 //   count: { $sum: 1 }
 // }
+router.get('/totalInventoryValue', (req, res) => {
+  console.log("fjd");
+  let totalValue = 0;
+  let newResult;
+  Inventory.aggregate([{
+    $group: {
+      _id: "$_id",
+      totalSum: {
+        $sum: {
+          $multiply: ["$quantity", "$originalPrice"]
+        }
+      }
+    }
+  }]).then(result => {
+    result.map(value => {
+      console.log(value, "value")
+      totalValue = value.totalSum + totalValue;
+    });
+    Inventory.count().then(counts => {
+      res.json({
+        inventoryValue: totalValue,
+        counts
+      })
+    })
+
+
+  });
+
+})
 
 router.get('/totalNoProduct', (req, res) => {
   let total = 0;
@@ -312,6 +377,7 @@ router.get('/totalNoProduct', (req, res) => {
       console.log(err)
     });
   })
+
 
   router.get('/report', (req, res) => {
     console.log("report")
