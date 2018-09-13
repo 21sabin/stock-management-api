@@ -1,8 +1,9 @@
+const moment = require('moment');
 var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
   const SalesModel = require('../models/sales')
-  const CategoryModel = require('../models/category');
+  const Category = require('./../models/category')
 
   async function createInventory(inventory) {
     console.log(inventory, 'casdasd');
@@ -14,7 +15,7 @@ var inventoryService = (() => {
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
       supplier: inventory.supplier,
-      date: inventory.date,
+      date: new Date(inventory.date),
       cid: inventory.productCategory
     })
     // return await InventoryModel.create(inventory)
@@ -22,16 +23,19 @@ var inventoryService = (() => {
 
   // for sales
   async function addSales(sales) {
-    console.log('inside add sales controller');
+    console.log(sales.date,'inside add sales controller');
     return await SalesModel.create({
-      productName: sales.productName,
-      category: sales.category,
-      date: sales.date,
+      pid: sales.pid,
+      // category: sales.category,
+      cid: sales.cid,
+      date:sales.date,
       rate: sales.rate,
       quantity: sales.quantity,
       total: sales.total
     })
   }
+
+
 
   async function fetchAllInventory() {
     return await InventoryModel.find();
@@ -39,35 +43,6 @@ var inventoryService = (() => {
 
   async function fetchInventoryById(inventoryId) {
     return await InventoryModel.findById(inventoryId);
-  }
-
-  // async function editInventory(body, inventoryId) {
-  //   return await InventoryModel.findByIdAndUpdate(inventoryId, {
-  //     $set: {
-  //       productName: body.productName,
-  //       quantity: body.quantity,
-  //       measurement: body.measurement,
-  //       originalPrice: body.originalPrice,
-  //       sellingPrice: body.sellingPrice,
-  //       profit: body.profit,
-  //       supplier: body.supplier
-  //     }
-  //   });
-  // }
-
-  async function deleteCategory(categoryId) {
-    return await CategoryModel.findByIdAndRemove(categoryId);
-  }
-
-  async function updateCategory(category) {
-    return await CategoryModel.update(
-      { _id: category._id },
-      {
-        $set: {
-          category: category.category
-        }
-      }
-    )
   }
 
   async function deleteInventory(id) {
@@ -79,37 +54,67 @@ var inventoryService = (() => {
   }
 
   async function countProduct() {
-    return await InventoryModel.aggregate([
-      { $group: { _id: "$pname", count: { $sum: 1 } } }
-    ])
+    return await InventoryModel.aggregate([{
+      $group: {
+        _id: "$pname",
+        count: {
+          $sum: 1
+        }
+      }
+    }])
   }
 
   async function updateProduct(product) {
     console.log(product, "product inside update porudiuct")
-    return await InventoryModel.updateOne(
-      { _id: product._id },
-      {
-        $set: {
-          productName: product.productName,
-          quantity: product.quantity,
-          measurement: product.measurement,
-          originalPrice: product.originalPrice,
-          sellingPrice: product.sellingPrice,
-          supplier: product.supplier,
-          date: product.date
+    return await InventoryModel.updateOne({
+      _id: product._id
+    }, {
+      $set: {
+        productName: product.productName,
+        quantity: product.quantity,
+        measurement: product.measurement,
+        originalPrice: product.originalPrice,
+        sellingPrice: product.sellingPrice,
+        supplier: product.supplier,
+        date: product.date
+      }
+    })
+  }
+
+  async function getCategoryById(cid) {
+    return Category.findById(cid);
+  }
+
+  async function deductProductFromInventory(sales) {
+    console.log(sales,"update salaes")
+      return await InventoryModel.updateOne(
+        {
+          _id:sales.pid
+        },
+        {
+          $set:{
+            quantity:sales.quantity
+          }
         }
-      }    
-  )}
+      )
+  }
+
+  async function deleteCategory(id) { 
+    return await Category.findByIdAndRemove(id);
+  }
 
   return {
     createInventory: createInventory,
     deleteInventory: deleteInventory,
     fetchProduct: fetchProduct,
+    fetchInventoryById: fetchInventoryById,
     countProduct: countProduct,
     updateProduct: updateProduct,
     addSales: addSales,
+    getCategoryById: getCategoryById,
+    deductProductFromInventory: deductProductFromInventory,
     deleteCategory: deleteCategory,
-    updateCategory: updateCategory
+    fetchAllInventory: fetchAllInventory
   }
 })();
 

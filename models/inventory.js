@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 let Schema = mongoose.Schema;
+let Category = require('./category');
+let Sales = require('./sales');
+
 
 const InventorySchema = new Schema({
   productName: {
@@ -30,14 +33,13 @@ const InventorySchema = new Schema({
     type: String,
     required: true
   },
-  date:{
-    type:String,
-    required:true
+  date: {
+    type: Date,
+    required: true
   },
-  cid:{
-    type:String,
-    required:true
-  }
+  type: { type: Schema.Types.ObjectId },
+  cid: { type: Schema.Types.ObjectId, ref: 'Category' }
 });
+let Inventory = mongoose.model("Inventory", InventorySchema);
 
-module.exports = mongoose.model("Inventory", InventorySchema);
+module.exports = Inventory;
