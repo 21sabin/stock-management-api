@@ -1,8 +1,12 @@
+const moment = require('moment');
 var inventoryService = (() => {
 
   const InventoryModel = require('../models/inventory');
   const SalesModel = require('../models/sales')
+
   const CategoryModel = require('../models/category');
+egory = require('./../models/category')
+
 
   async function createInventory(inventory) {
     console.log(inventory, 'casdasd');
@@ -14,7 +18,7 @@ var inventoryService = (() => {
       sellingPrice: inventory.sellingPrice,
       profit: inventory.profit,
       supplier: inventory.supplier,
-      date: inventory.date,
+      date: new Date(inventory.date),
       cid: inventory.productCategory
     })
     // return await InventoryModel.create(inventory)
@@ -22,16 +26,17 @@ var inventoryService = (() => {
 
   // for sales
   async function addSales(sales) {
-    console.log('inside add sales controller');
+    console.log(sales.date,'inside add sales controller');
     return await SalesModel.create({
-      productName: sales.productName,
+      pid: sales.productName,
       category: sales.category,
-      date: sales.date,
+      date:sales.date,
       rate: sales.rate,
-      quantity: sales.quantity,
-      total: sales.total
+      quantity: sales.quantity
     })
   }
+
+
 
   async function fetchAllInventory() {
     return await InventoryModel.find();
@@ -79,34 +84,55 @@ var inventoryService = (() => {
   }
 
   async function countProduct() {
-    return await InventoryModel.aggregate([
-      { $group: { _id: "$pname", count: { $sum: 1 } } }
-    ])
+    return await InventoryModel.aggregate([{
+      $group: {
+        _id: "$pname",
+        count: {
+          $sum: 1
+        }
+      }
+    }])
   }
 
   async function updateProduct(product) {
     console.log(product, "product inside update porudiuct")
-    return await InventoryModel.updateOne(
-      { _id: product._id },
-      {
-        $set: {
-          productName: product.productName,
-          quantity: product.quantity,
-          measurement: product.measurement,
-          originalPrice: product.originalPrice,
-          sellingPrice: product.sellingPrice,
-          supplier: product.supplier,
-          date: product.date
-        }
+    return await InventoryModel.updateOne({
+      _id: product._id
+    }, {
+      $set: {
+        productName: product.productName,
+        quantity: product.quantity,
+        measurement: product.measurement,
+        originalPrice: product.originalPrice,
+        sellingPrice: product.sellingPrice,
+        supplier: product.supplier,
+        date: product.date
       }
-<<<<<<< Updated upstream
-    )
+    })
   }
-=======
-    },
-    
-  )}
->>>>>>> Stashed changes
+
+  async function getCategoryById(cid) {
+    return Category.findById(cid);
+  }
+
+  async function deductProductFromInventory(sales) {
+    console.log(sales,"update salaes");
+    let quantity;
+    InventoryModel.findById(sales.productName).then(product=>{
+        quantity=product.quantity;
+        return InventoryModel.updateOne(
+          {
+            _id:sales.productName
+          },
+          {
+            $set:{
+              quantity:quantity-sales.quantity
+            }
+          }
+        )
+    })
+     
+  }
 
   return {
     createInventory: createInventory,
@@ -115,8 +141,13 @@ var inventoryService = (() => {
     countProduct: countProduct,
     updateProduct: updateProduct,
     addSales: addSales,
+
     deleteCategory: deleteCategory,
     updateCategory: updateCategory
+
+    getCategoryById: getCategoryById,
+    deductProductFromInventory: deductProductFromInventory
+
   }
 })();
 

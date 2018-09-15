@@ -6,7 +6,7 @@ const authService = require('../services/authService');
 const userService=require('../services/userService');
 const config=require('../config');
 
-const CreateUser = require('../models/user');
+// const CreateUser = require('../models/user');
 
 
 router.post('/login', (req, res) => {
@@ -44,15 +44,29 @@ router.post('/login', (req, res) => {
    
 });
 
-router.post('/signup', (req, res) => {
-    authService.createUser(req.body)
-        .then(data => {
-            res.status(201).json({
-                success: "true",
-                message: "User created Sucessfully",
-                data: data
+router.post('/registration', (req, res) => {
+    authService.checkAdmin(req.body).then(duplicateAdmin=>{
+     
+        if(duplicateAdmin){
+            console.log(duplicateAdmin,"abc")
+              res.json({
+                success: "false",
+                message: "Admin already exist", 
             })
-        })
+        }else{
+            console.log("duplicate iem")
+            authService.createAdmin(req.body)
+            .then(data => {
+                res.status(201).json({
+                    success: "true",
+                    message: "Admin created Sucessfully",
+                    data: data
+                })
+            })
+        }
+        
+    })
+   
 })
 
 

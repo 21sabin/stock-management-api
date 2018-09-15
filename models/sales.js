@@ -1,11 +1,9 @@
 const mongoose = require('mongoose');
 let Schema = mongoose.Schema;
+let Inventory=require('./inventory');
+let Category=require('./category');
 
 const SalesSchema = new Schema({
-  productName: {
-    type: String,
-    required: true
-  },
   category: {
     type: String,
     required: true
@@ -22,10 +20,8 @@ const SalesSchema = new Schema({
     type: Number,
     required: true
   },
-  total: {
-    type: Number,
-    required: true
-  }
+  pid:{type:Schema.Types.ObjectId,ref:'Inventory'},
+  category:{type:Schema.Types.ObjectId,ref:"Category"}
 });
 
 module.exports = mongoose.model("Sales", SalesSchema);

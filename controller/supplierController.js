@@ -32,6 +32,10 @@ router.post('/', (req, res) => {
         })
 });
 
+router.post("/duplicateSupplier",(req,res)=>{
+    console.log(req.body,"supplier contact")
+})
+
 router.delete('/:supplierId', (req, res) => {
     console.log("delte", req.params.supplierId)
     console.log(req.params.supplierId, "delete request")
