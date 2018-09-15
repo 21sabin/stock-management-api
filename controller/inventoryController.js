@@ -111,6 +111,16 @@ router.get('/category', (req, res) => {
   });
 })
 
+router.get('/category/:cid', (req, res) => {
+  console.log("category")
+  Category.findById(req.params.cid).then(result => {
+    console.log(result, "result")
+    res.json({
+      data: result
+    })
+  });
+})
+
 router.delete('/:inventoryID', (req, res) => {
   console.log('inside delete inventory', req.params.inventoryID);
   inventoryService.deleteInventory(req.params.inventoryID)
