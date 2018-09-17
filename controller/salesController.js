@@ -6,7 +6,7 @@ const moment = require('moment');
 
 
 router.get('/report', (req, res) => {
-    Sales.find().populate('pid').populate('category').exec((err, sales) => {
+    Sales.find().populate('pid').populate('cid').exec((err, sales) => {
         res.status(200).json({
             data: sales
         })

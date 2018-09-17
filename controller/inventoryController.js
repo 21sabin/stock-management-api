@@ -12,138 +12,6 @@ const moment = require('moment');
 
 const inventoryService = require('../services/inventoryService');
 
-router.get('/:inventoryId', (req, res) => {
-  inventoryService.fetchInventoryById(req.params.inventoryId)
-    .then(data => {
-      res.status(200).json({
-        data: data
-      })
-    })
-    .catch(err => {
-      res.json({
-        error: err
-      })
-    })
-})
-
-router.post('/create', (req, res) => {
-  console.log(req.body, "product")
-  Inventory.findOne({ productName: req.body.productName }).then(duplicateProduct => {
-    if (duplicateProduct) {
-      console.log("update stock")
-      let newStock = parseInt(req.body.quantity) + parseInt(duplicateProduct.quantity);
-      Inventory.updateOne({ productName: req.body.productName }, {
-        $set: {
-          productName: duplicateProduct.productName,
-          quantity: newStock,
-          measurement: duplicateProduct.measurement,
-          originalPrice: duplicateProduct.originalPrice,
-          sellingPrice: duplicateProduct.sellingPrice,
-          supplier: duplicateProduct.supplier,
-          date: duplicateProduct.date
-        }
-      }).then(result => {
-        console.log(result,"update sucessfully")
-        res.status(201).json({
-          message: "Inventory stock update successfully",
-          updateStock: true,
-          data: result
-        })
-      })
-    } else {
-      console.log("new proudct")
-      inventoryService.createInventory(req.body)
-        .then(result => {
-          res.status(201).json({
-            message: "Inventory update successfully",
-            updateStock: false,
-            data: result
-          })
-
-        })
-    }
-  })
-});
-
-router.post('/addSales', (req, res) => {
-  inventoryService.addSales(req.body)
-    .then(data => {
-      console.log(data, 'asdasdadasdddddd')
-      inventoryService.deductProductFromInventory(req.body).then(result => {
-        console.log(result, "upate success")
-      }).catch(err => {
-        console.log(err, "udpate failed")
-      });
-
-      inventoryService.getCategoryById(req.body.cid).then(category => {
-        Object.assign(category, data);
-        console.log(Object.assign(category, data), 'object assigned to category')
-      })
-
-      inventoryService.fetchInventoryById(req.body.pid).then(inventory => {
-        console.log(inventory, 'inventoryData');
-        res.status(201).json({
-          message: 'Sales added successfully!',
-          success: true,
-          data: { sales: {data, inventory} }
-          
-        })
-      })
-      // res.status(201).json({
-      //   message: 'Sales added successfully!',
-      //   success: true,
-      //   data,
-      //   inventoryData
-      // })
-    })
-    .catch(err => {
-      res.json({
-        message: 'Can\'t add sales',
-        err
-      })
-    })
-});
-
-
-
-router.post("/category", (req, res) => {
-  console.log(req.body, "categories");
-  Category.create(req.body)
-    .then(result => {
-      res.json({
-        message: "Category created successfully",
-        data: result
-      })
-    })
-});
-
-router.delete('/category/:categoryId', (req, res) => {
-  inventoryService.deleteCategory(req.params.categoryId)
-    .then(data => {
-      res.json({
-        message: 'Category deleted successfully',
-        success: true,
-        data
-      })
-    })
-    .catch(err => {
-      res.json({
-        message: 'Category delete failed!',
-        err
-      })
-    })
-});
-
-router.put('/category', (req, res) => {
-  inventoryService.updateCategory(req.body)
-    .then(data => {
-      Category.findById(req.body._id)
-        .then(result => {
-          data: result
-        })
-    })
-})
-
 router.get('/', (req, res) => {
   inventoryService.fetchProduct().then(response => res.status(200).json({
     success: true,
@@ -168,24 +36,6 @@ router.get('/category', (req, res) => {
     })
   });
 })
-
-router.delete('/:inventoryID', (req, res) => {
-  console.log('inside delete inventory', req.params.inventoryID);
-  inventoryService.deleteInventory(req.params.inventoryID)
-    .then(data => {
-      res.json({
-        message: "Inventory deleted successfully",
-        success: true,
-        data: data
-      })
-    })
-    .catch(err => {
-      res.json({
-        message: "Couldn't delete inventroy with the specified ID",
-        success: false
-      })
-    })
-});
 
 router.get('/report', (req, res) => {
   Inventory.find().populate("cid").exec((err, products) => {
@@ -315,8 +165,6 @@ router.get('/totalInventoryValue', (req, res) => {
         counts
       })
     })
-
-
   });
 
 })
@@ -344,64 +192,196 @@ router.get('/totalNoProduct', (req, res) => {
       count: total
     })
   })
+});
 
-  router.get('/totalInventoryValue', (req, res) => {
-    let totalValue = 0;
-    Inventory.aggregate([{
-      $match: {}
-    },
-    {
-      $group: {
-        _id: "$productName",
-        quantity: {
-          $sum: "$quantity"
-        },
-        cost: {
-          $sum: "$originalPrice"
-        }
+router.get('/totalInventoryValue', (req, res) => {
+  let totalValue = 0;
+  Inventory.aggregate([{
+    $match: {}
+  },
+  {
+    $group: {
+      _id: "$productName",
+      quantity: {
+        $sum: "$quantity"
+      },
+      cost: {
+        $sum: "$originalPrice"
       }
     }
-    ]).then((result) => {
-      result.map(product => {
-        let quantity = parseInt(product.quantity);
-        let cost = parseInt(product.cost);
-        console.log(quantity * cost)
-        totalValue = quantity * cost + totalValue;
-        console.log(totalValue, "total");
-        res.json({
-          message: "Total inventory value",
-          value: totalValue
+  }
+  ]).then((result) => {
+    result.map(product => {
+      let quantity = parseInt(product.quantity);
+      let cost = parseInt(product.cost);
+      console.log(quantity * cost)
+      totalValue = quantity * cost + totalValue;
+      console.log(totalValue, "total");
+      res.json({
+        message: "Total inventory value",
+        value: totalValue
+      })
+    })
+  }).catch(err => {
+    console.log(err)
+  });
+})
+
+router.post('/create', (req, res) => {
+  console.log(req.body, "product")
+  Inventory.findOne({ productName: req.body.productName }).then(duplicateProduct => {
+    if (duplicateProduct) {
+      console.log("update stock")
+      let newStock = parseInt(req.body.quantity) + parseInt(duplicateProduct.quantity);
+      Inventory.updateOne({ productName: req.body.productName }, {
+        $set: {
+          productName: duplicateProduct.productName,
+          quantity: newStock,
+          measurement: duplicateProduct.measurement,
+          originalPrice: duplicateProduct.originalPrice,
+          sellingPrice: duplicateProduct.sellingPrice,
+          supplier: duplicateProduct.supplier,
+          date: duplicateProduct.date
+        }
+      }).then(result => {
+        console.log(result, "update sucessfully")
+        res.status(201).json({
+          message: "Inventory stock update successfully",
+          updateStock: true,
+          data: result
         })
       })
-    }).catch(err => {
-      console.log(err)
-    });
+    } else {
+      console.log("new proudct")
+      inventoryService.createInventory(req.body)
+        .then(result => {
+          res.status(201).json({
+            message: "Inventory update successfully",
+            updateStock: false,
+            data: result
+          })
+
+        })
+    }
   })
+});
 
+router.post('/addSales', (req, res) => {
+  inventoryService.addSales(req.body)
+    .then(data => {
+      console.log(data, 'asdasdadasdddddd')
+      inventoryService.deductProductFromInventory(req.body).then(result => {
+        console.log(result, "upate success")
+      }).catch(err => {
+        console.log(err, "udpate failed")
+      });
 
-  router.get('/report', (req, res) => {
-    console.log("report")
-    Inventory.aggregate([{
-      $group: {
-        _id: "$cid"
-      }
-    }]).then(result => {
+      inventoryService.getCategoryById(req.body.cid).then(category => {
+        Object.assign(category, data);
+        console.log(Object.assign(category, data), 'object assigned to category')
+      })
+
+      inventoryService.fetchInventoryById(req.body.pid).then(inventory => {
+        console.log(inventory, 'inventoryData');
+        res.status(201).json({
+          message: 'Sales added successfully!',
+          success: true,
+          data: { sales: { data, inventory } }
+
+        })
+      })
+      // res.status(201).json({
+      //   message: 'Sales added successfully!',
+      //   success: true,
+      //   data,
+      //   inventoryData
+      // })
+    })
+    .catch(err => {
       res.json({
+        message: 'Can\'t add sales',
+        err
+      })
+    })
+});
+
+
+
+router.post("/category", (req, res) => {
+  console.log(req.body, "categories");
+  Category.create(req.body)
+    .then(result => {
+      res.json({
+        message: "Category created successfully",
         data: result
       })
     })
-  })
+});
 
-  router.put("/update", (req, res) => {
-    console.log(req.body, "update product");
-    inventoryService.updateProduct(req.body)
-      .then(result => {
-        console.log(result, "updated sucessfully")
+router.delete('/category/:categoryId', (req, res) => {
+  inventoryService.deleteCategory(req.params.categoryId)
+    .then(data => {
+      res.json({
+        message: 'Category deleted successfully',
+        success: true,
+        data
       })
-      .catch(err => {
-        console.log(err, "error occured")
+    })
+    .catch(err => {
+      res.json({
+        message: 'Category delete failed!',
+        err
       })
-  });
+    })
+});
+
+
+
+router.put('/category', (req, res) => {
+  inventoryService.updateCategory(req.body)
+    .then(data => {
+      Category.findById(req.body._id)
+        .then(result => {
+          data: result
+        })
+    })
+})
+
+
+
+
+
+router.delete('/:inventoryID', (req, res) => {
+  console.log('inside delete inventory', req.params.inventoryID);
+  inventoryService.deleteInventory(req.params.inventoryID)
+    .then(data => {
+      res.json({
+        message: "Inventory deleted successfully",
+        success: true,
+        data: data
+      })
+    })
+    .catch(err => {
+      res.json({
+        message: "Couldn't delete inventroy with the specified ID",
+        success: false
+      })
+    })
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -421,13 +401,44 @@ router.get('/totalNoProduct', (req, res) => {
   //   })
   // })
 
+
+router.get('/report', (req, res) => {
+  console.log("report")
+  Inventory.aggregate([{
+    $group: {
+      _id: "$cid"
+    }
+  }]).then(result => {
+    res.json({
+      data: result
+    })
+  })
+})
+
+router.put("/update", (req, res) => {
+  console.log(req.body, "update product");
+  inventoryService.updateProduct(req.body)
+    .then(result => {
+      console.log(result, "updated sucessfully")
+    })
+    .catch(err => {
+      console.log(err, "error occured")
+    })
 });
+
+router.get('/:inventoryId', (req, res) => {
+  Inventory.findById(req.params.inventoryId).populate("cid").then(result => {
+    res.json({
+      data: result
+    })
+  })
+})
 
 router.get('/category/:productId', (req, res) => {
   console.log(req.params, 'asdasd');
   inventoryService.fetchInventoryById(req.params.productId)
     .then(result => {
-      console.log(result,'category/:productId');
+      console.log(result, 'category/:productId');
       inventoryService.getCategoryById(result.cid)
         .then(data => {
           console.log(result.cid, 'categoryid');
