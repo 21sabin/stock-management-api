@@ -4,10 +4,10 @@ let Inventory=require('./inventory');
 let Category=require('./category');
 
 const SalesSchema = new Schema({
-  // category: {
-  //   type: String,
-  //   required: true
-  // },
+  category: {
+    type: String,
+    required: true
+  },
   date:{
     type: Date,
     required:true

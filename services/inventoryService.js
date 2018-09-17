@@ -25,8 +25,8 @@ var inventoryService = (() => {
   async function addSales(sales) {
     console.log(sales.date, 'inside add sales controller');
     return await SalesModel.create({
-      pid: sales.pid,
-      // category: sales.category,
+      pid: sales.productName,
+      category: sales.category,
       cid: sales.cid,
       date: sales.date,
       rate: sales.rate,
@@ -85,8 +85,8 @@ var inventoryService = (() => {
     return Category.findById(cid);
   }
 
-  async function deductProductFromInventory(sales) {
-    console.log(sales, "update salaes")
+  async function deductProductFromInventory(sales,quantity) {
+    console.log(quantity,"inventory quantity");
     return await InventoryModel.updateOne(
       {
         _id: sales.pid

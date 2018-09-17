@@ -267,35 +267,37 @@ router.post('/create', (req, res) => {
 });
 
 router.post('/addSales', (req, res) => {
+  console.log(req.body,"req.body")
   inventoryService.addSales(req.body)
     .then(data => {
-      console.log(data, 'asdasdadasdddddd')
-      inventoryService.deductProductFromInventory(req.body).then(result => {
-        console.log(result, "upate success")
-      }).catch(err => {
-        console.log(err, "udpate failed")
-      });
-
-      inventoryService.getCategoryById(req.body.cid).then(category => {
-        Object.assign(category, data);
-        console.log(Object.assign(category, data), 'object assigned to category')
+      console.log(data,"data")
+      Inventory.findById(data.pid).then(product=>{
+        console.log(product,"product");
+        let salesQuantity=parseInt(req.body.quantity)
+          if(salesQuantity>product.quantity){
+            res.json({
+              success:false,
+              message:"The quantity you have entered is more than the actual stock."
+            })
+          }else{
+            Inventory.updateOne(
+              {
+                _id: data.pid
+              },
+              {
+                $set: {
+                  quantity: product.quantity - data.quantity
+                }
+              }).then(success=>{
+                res.json({
+                  success:true,
+                  message:"sales added successfully."
+                })
+              })
+          }
+      }).catch(err=>{
+        console.log(err,"product err")
       })
-
-      inventoryService.fetchInventoryById(req.body.pid).then(inventory => {
-        console.log(inventory, 'inventoryData');
-        res.status(201).json({
-          message: 'Sales added successfully!',
-          success: true,
-          data: { sales: { data, inventory } }
-
-        })
-      })
-      // res.status(201).json({
-      //   message: 'Sales added successfully!',
-      //   success: true,
-      //   data,
-      //   inventoryData
-      // })
     })
     .catch(err => {
       res.json({
