@@ -26,6 +26,16 @@ router.get('/', (req, res) => {
     })
 });
 
+// router.get('/',()=>{
+//   SalesModel.find().populate("pid").then(salesList=>{
+//     res.json({
+//       data:salesList
+//     })
+//   }).catch(err=>{
+//     err
+//   })
+// })
+
 router.get('/category', (req, res) => {
   console.log("category")
   Category.find().then(result => {
@@ -317,12 +327,13 @@ router.post("/category", (req, res) => {
         message: "Category created successfully",
         data: result
       })
-    })
+     })
 });
 
 router.delete('/category/:categoryId', (req, res) => {
   inventoryService.deleteCategory(req.params.categoryId)
     .then(data => {
+      console.log(data,"categpru deleted")
       res.json({
         message: 'Category deleted successfully',
         success: true,
@@ -350,18 +361,19 @@ router.put('/category', (req, res) => {
 })
 
 
-
-
-
 router.delete('/:inventoryID', (req, res) => {
   console.log('inside delete inventory', req.params.inventoryID);
   inventoryService.deleteInventory(req.params.inventoryID)
     .then(data => {
-      res.json({
-        message: "Inventory deleted successfully",
-        success: true,
-        data: data
+      SalesModel.remove({pid:req.params.inventoryID}).then(salesDelete=>{
+        console.log(salesDelete,"salesDelete")
+        res.json({
+          message: "Inventory deleted successfully",
+          success: true,
+          data: data
+        })
       })
+     
     })
     .catch(err => {
       res.json({

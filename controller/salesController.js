@@ -15,7 +15,6 @@ router.get('/report', (req, res) => {
 
 /*api for chartjs implementatioon */
 router.get('/summary', (req, res) => {
-    console.log("summary");
     Sales.aggregate([{
             $match: {
                 quantity: "quantity"
@@ -36,20 +35,6 @@ router.get('/summary', (req, res) => {
             data: result
         })
     })
-    // Sales.aggregate([
-    //     {
-    //         $lookup:{
-    //             from:"Inventory",
-    //             localField:"category",
-    //             foreignField:"cid",
-    //             as:"category_list"
-    //         }
-    //     }
-    // ]).then(result=>{
-    //     res.json({
-    //         data:result
-    //     })
-    // })
 
 })
 
@@ -87,74 +72,8 @@ router.get("/mostSold", (req, res) => {
     })
 
 })
-// Invite.aggregate(
-//     { $match: {interview: req.params.interview}},
-//     { $lookup: {from: 'users', localField: 'email', foreignField: 'email', as: 'user'} }
-//   ).exec( function (err, invites) {
-//     if (err) {
-//       next(err);
-//     }
-
-//     res.json(invites);
-//   }
-// );
 router.get('/daily', (req, res) => {
-    // Sales.aggregate([
-    //     {
-    //         $group:{
-    //             _id:{day:{$dayOfMonth:"$date"},id:"$_id",totalSales:{$sum:{$multiply:["$rate","$quantity"]}}}
-    //         }
-    //     },{
-    //         $lookup:{
-    //             from:"Inventory",
-    //             localField:"pid",
-    //             foreignField:"_id",
-    //             as:"products"
-    //         }
-    //     }
-    // ]).then(data=>{
-    //     console.log(data);
-    //     let product=[]
-    //     data.forEach(p=>{
-    //        Inventory.findById(p._id.id).then(result=>{
-    //            console.log(result,"inventory resul")
-    //        })
-    //     })
-    //     res.json({
-    //         result:data
-    //     })
-    // })
-
-
-    // Sales.aggregate([{
-    //         $group: {
-    //             _id: {
-    //                 day: {
-    //                     $dayOfMonth: "$date"
-    //                 },
-    //                 totalSales: {
-    //                     $sum: {
-    //                         $multiply: ["$rate", "$quantity"]
-    //                     }
-    //                 }
-    //             },
-    //         }
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: 'InventoryModel',
-    //             localField: 'product',
-    //             foreignField: '_id',
-    //             as: 'product'
-    //         }
-    //     }
-    // ]).exec(function (err, result) {
-    //     if (err) {
-    //         console.log(err);
-    //     }
-    //     console.log(result, "result")
-    //     res.json(result);
-    // });
+  
 })
 
 router.get("/monthly", (req, res) => {
@@ -177,16 +96,9 @@ router.get("/monthly", (req, res) => {
 })
 router.get('/report/:id', (req, res) => {
     let id = req.params.id;
-    //    var query=Sales.find({});
-    //    query.where('pid',"5b88d7e01b5ef713c2caf4e8");
-    //    query.exec((err,result)=>{
-    //     res.json({
-    //         data:result
-    //     })
-    //    })
     Sales.find({
         'pid': req.params.id
-    }).populate('pid').populate('category').exec((err, sales) => {
+    }).populate('pid').populate('cid').exec((err, sales) => {
         if (sales) {
             res.json({
                 data: sales
